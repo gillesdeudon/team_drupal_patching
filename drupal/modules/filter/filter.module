@@ -1902,7 +1902,8 @@ function _filter_preg_class_letters() {
   '\x{1e00}-\x{1eff}'. // Latin Extended Additional.
   '\x{1f00}-\x{1fff}'. // Greek Extended.
   '\x{3040}-\x{309f}'. // Hiragana.
-  '\x{30a0}-\x{30ff}' // Katakana.
+  '\x{30a0}-\x{30ff}'. // Katakana.
+  '\x{4E00}-\x{9FEF}' // CJK Unified Ideographs.
   ;
   return $rex;
 }
