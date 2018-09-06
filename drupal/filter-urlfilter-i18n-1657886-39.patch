@@ -1,0 +1,191 @@
+diff --git a/modules/filter/filter.module b/modules/filter/filter.module
+index e9fd01d..2749ce5 100644
+--- a/modules/filter/filter.module
++++ b/modules/filter/filter.module
+@@ -1364,7 +1364,7 @@ function _filter_html_tips($filter, $format, $long = FALSE) {
+     'tr' => NULL, 'td' => NULL, 'th' => NULL,
+     'del' => array(t('Deleted'), '<del>' . t('Deleted') . '</del>'),
+     'ins' => array(t('Inserted'), '<ins>' . t('Inserted') . '</ins>'),
+-     // Assumes and describes li.
++    // Assumes and describes li.
+     'ol' => array(t('Ordered list - use the &lt;li&gt; to begin each list item'), '<ol> <li>' . t('First item') . '</li> <li>' . t('Second item') . '</li> </ol>'),
+     'ul' => array(t('Unordered list - use the &lt;li&gt; to begin each list item'), '<ul> <li>' . t('First item') . '</li> <li>' . t('Second item') . '</li> </ul>'),
+     'li' => NULL,
+@@ -1476,34 +1476,46 @@ function _filter_url($text, $filter) {
+   $protocols = variable_get('filter_allowed_protocols', array('ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal'));
+   $protocols = implode(':(?://)?|', $protocols) . ':(?://)?';
+ 
++  $valid_url_path_characters = "[\p{L}\p{M}\p{N}!\*\';:=\+,\.\$\/%#\[\]\-_~@&]";
++
++  // Allow URL paths to contain balanced parens
++  // 1. Used in Wikipedia URLs like /Primer_(film)
++  // 2. Used in IIS sessions like /S(dfd346)/
++  $valid_url_balanced_parens = '\(' . $valid_url_path_characters . '+\)';
++
++  // Valid end-of-path characters (so /foo. does not gobble the period).
++  // 1. Allow =&# for empty URL parameters and other URL-join artifacts
++  $valid_url_ending_characters = '[\p{L}\p{M}\p{N}:_+~#=/]|(?:' . $valid_url_balanced_parens . ')';
++
++  $valid_url_query_chars = '[a-zA-Z0-9!?\*\'@\(\);:&=\+\$\/%#\[\]\-_\.,~|]';
++  $valid_url_query_ending_chars = '[a-zA-Z0-9_&=#\/]';
++
++  //full path
++  //and allow @ in a url, but only in the middle. Catch things like http://example.com/@user/
++  $valid_url_path = '(?:(?:' . $valid_url_path_characters . '*(?:' . $valid_url_balanced_parens . $valid_url_path_characters . '*)*' . $valid_url_ending_characters . ')|(?:@' . $valid_url_path_characters . '+\/))';
++
+   // Prepare domain name pattern.
+   // The ICANN seems to be on track towards accepting more diverse top level
+   // domains, so this pattern has been "future-proofed" to allow for TLDs
+   // of length 2-64.
+-  $domain = '(?:[A-Za-z0-9._+-]+\.)?[A-Za-z]{2,64}\b';
++  $domain = '(?:[\p{L}\p{M}\p{N}._+-]+\.)?[\p{L}\p{M}]{2,64}\b';
+   $ip = '(?:[0-9]{1,3}\.){3}[0-9]{1,3}';
+-  $auth = '[a-zA-Z0-9:%_+*~#?&=.,/;-]+@';
+-  $trail = '[a-zA-Z0-9:%_+*~#&\[\]=/;?!\.,-]*[a-zA-Z0-9:%_+*~#&\[\]=/;-]';
+-
+-  // Prepare pattern for optional trailing punctuation.
+-  // Even these characters could have a valid meaning for the URL, such usage is
+-  // rare compared to using a URL at the end of or within a sentence, so these
+-  // trailing characters are optionally excluded.
+-  $punctuation = '[\.,?!]*?';
++  $auth = '[\p{L}\p{M}\p{N}:%_+*~#?&=.,/;-]+@';
++  $trail = '(' . $valid_url_path . '*)?(\\?' . $valid_url_query_chars . '*' . $valid_url_query_ending_chars . ')?';
+ 
+   // Match absolute URLs.
+   $url_pattern = "(?:$auth)?(?:$domain|$ip)/?(?:$trail)?";
+-  $pattern = "`((?:$protocols)(?:$url_pattern))($punctuation)`";
++  $pattern = "`((?:$protocols)(?:$url_pattern))`u";
+   $tasks['_filter_url_parse_full_links'] = $pattern;
+ 
+-  // Match e-mail addresses.
+-  $url_pattern = "[A-Za-z0-9._+-]{1,254}@(?:$domain)";
+-  $pattern = "`($url_pattern)`";
++  // Match email addresses.
++  $url_pattern = "[\p{L}\p{M}\p{N}._+-]{1,254}@(?:$domain)";
++  $pattern = "`($url_pattern)`u";
+   $tasks['_filter_url_parse_email_links'] = $pattern;
+ 
+   // Match www domains.
+   $url_pattern = "www\.(?:$domain)/?(?:$trail)?";
+-  $pattern = "`($url_pattern)($punctuation)`";
++  $pattern = "`($url_pattern)`u";
+   $tasks['_filter_url_parse_partial_links'] = $pattern;
+ 
+   // Each type of URL needs to be processed separately. The text is joined and
+@@ -1558,7 +1570,7 @@ function _filter_url($text, $filter) {
+     }
+ 
+     $text = implode($chunks);
+-    // Revert back to the original comment contents
++    // Revert to the original comment contents
+     _filter_url_escape_comments('', FALSE);
+     $text = preg_replace_callback('`<!--(.*?)-->`', '_filter_url_escape_comments', $text);
+   }
+@@ -1578,7 +1590,7 @@ function _filter_url_parse_full_links($match) {
+   $match[$i] = decode_entities($match[$i]);
+   $caption = check_plain(_filter_url_trim($match[$i]));
+   $match[$i] = check_plain($match[$i]);
+-  return '<a href="' . $match[$i] . '">' . $caption . '</a>' . $match[$i + 1];
++  return '<a href="' . $match[$i] . '">' . $caption . '</a>';
+ }
+ 
+ /**
+@@ -1608,7 +1620,7 @@ function _filter_url_parse_partial_links($match) {
+   $match[$i] = decode_entities($match[$i]);
+   $caption = check_plain(_filter_url_trim($match[$i]));
+   $match[$i] = check_plain($match[$i]);
+-  return '<a href="http://' . $match[$i] . '">' . $caption . '</a>' . $match[$i + 1];
++  return '<a href="http://' . $match[$i] . '">' . $caption . '</a>';
+ }
+ 
+ /**
+diff --git a/modules/filter/filter.test b/modules/filter/filter.test
+index 34dcf04..1f0d98a 100644
+--- a/modules/filter/filter.test
++++ b/modules/filter/filter.test
+@@ -1325,6 +1325,7 @@ function testUrlFilter() {
+ http://trailingslash.com/ or www.trailingslash.com/
+ http://host.com/some/path?query=foo&bar[baz]=beer#fragment or www.host.com/some/path?query=foo&bar[baz]=beer#fragment
+ http://twitter.com/#!/example/status/22376963142324226
++http://example.com/@user/
+ ftp://user:pass@ftp.example.com/~home/dir1
+ sftp://user@nonstandardport:222/dir
+ ssh://192.168.0.100/srv/git/drupal.git
+@@ -1334,10 +1335,29 @@ function testUrlFilter() {
+         '<a href="http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
+         '<a href="http://www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
+         '<a href="http://twitter.com/#!/example/status/22376963142324226">http://twitter.com/#!/example/status/22376963142324226</a>' => TRUE,
++        '<a href="http://example.com/@user/">http://example.com/@user/</a>' => TRUE,
+         '<a href="ftp://user:pass@ftp.example.com/~home/dir1">ftp://user:pass@ftp.example.com/~home/dir1</a>' => TRUE,
+         '<a href="sftp://user@nonstandardport:222/dir">sftp://user@nonstandardport:222/dir</a>' => TRUE,
+         '<a href="ssh://192.168.0.100/srv/git/drupal.git">ssh://192.168.0.100/srv/git/drupal.git</a>' => TRUE,
+       ),
++      // International Unicode characters.
++      '
++http://пример.испытание/
++http://مثال.إختبار/
++http://例子.測試/
++http://12345.中国/
++http://例え.テスト/
++http://dréißig-bücher.de/
++http://méxico-mañana.es/
++' => array(
++        '<a href="http://пример.испытание/">http://пример.испытание/</a>' => TRUE,
++        '<a href="http://مثال.إختبار/">http://مثال.إختبار/</a>' => TRUE,
++        '<a href="http://例子.測試/">http://例子.測試/</a>' => TRUE,
++        '<a href="http://12345.中国/">http://12345.中国/</a>' => TRUE,
++        '<a href="http://例え.テスト/">http://例え.テスト/</a>' => TRUE,
++        '<a href="http://dréißig-bücher.de/">http://dréißig-bücher.de/</a>' => TRUE,
++        '<a href="http://méxico-mañana.es/">http://méxico-mañana.es/</a>' => TRUE,
++      ),
+       // Encoding.
+       '
+ http://ampersand.com/?a=1&b=2
+@@ -1396,6 +1416,9 @@ function testUrlFilter() {
+ Partial URL with 3 trailing www.partial.periods...
+ E-mail with 3 trailing exclamations@example.com!!!
+ Absolute URL and query string with 2 different punctuation characters (http://www.example.com/q=abc).
++Partial URL with brackets in the URL as well as surrounded brackets (www.foo.com/more_(than)_one_(parens)).
++Absolute URL with square brackets in the URL as well as surrounded brackets [http://www.drupal.org/?class[]=1]
++Absolute URL with quotes "http://www.drupal.org/sample"
+ ' => array(
+         'period <a href="http://www.partial.com">www.partial.com</a>.' => TRUE,
+         'comma <a href="mailto:person@example.com">person@example.com</a>,' => TRUE,
+@@ -1404,6 +1427,9 @@ function testUrlFilter() {
+         'trailing <a href="http://www.partial.periods">www.partial.periods</a>...' => TRUE,
+         'trailing <a href="mailto:exclamations@example.com">exclamations@example.com</a>!!!' => TRUE,
+         'characters (<a href="http://www.example.com/q=abc">http://www.example.com/q=abc</a>).' => TRUE,
++        'brackets (<a href="http://www.foo.com/more_(than)_one_(parens)">www.foo.com/more_(than)_one_(parens)</a>).' => TRUE,
++        'brackets [<a href="http://www.drupal.org/?class[]=1">http://www.drupal.org/?class[]=1</a>]' => TRUE,
++        'quotes "<a href="http://www.drupal.org/sample">http://www.drupal.org/sample</a>"' => TRUE,
+       ),
+       '
+ (www.parenthesis.com/dir?a=1&b=2#a)
+diff --git a/modules/filter/tests/filter.url-input.txt b/modules/filter/tests/filter.url-input.txt
+index 7b33af5..92289dc 100644
+--- a/modules/filter/tests/filter.url-input.txt
++++ b/modules/filter/tests/filter.url-input.txt
+@@ -10,6 +10,9 @@ http://www.test.com
+ www.test.com
+ person@test.com
+ <code>www.test.com</code>
++http://test.com/?search=test
++http://test.com/?search=Test
++http://test.com/?search=tesT
+ 
+ What about tags that don't exist <x>like x say www.test.com</x>? And what about tag <pooh>beginning www.test.com with p?</pooh>
+ 
+diff --git a/modules/filter/tests/filter.url-output.txt b/modules/filter/tests/filter.url-output.txt
+index 9cc5073..814a4ed 100644
+--- a/modules/filter/tests/filter.url-output.txt
++++ b/modules/filter/tests/filter.url-output.txt
+@@ -10,6 +10,9 @@ This is just a <a href="http://www.test.com">www.test.com</a>. paragraph with <a
+ <a href="http://www.test.com">www.test.com</a>
+ <a href="mailto:person@test.com">person@test.com</a>
+ <code>www.test.com</code>
++<a href="http://test.com/?search=test">http://test.com/?search=test</a>
++<a href="http://test.com/?search=Test">http://test.com/?search=Test</a>
++<a href="http://test.com/?search=tesT">http://test.com/?search=tesT</a>
+ 
+ What about tags that don't exist <x>like x say <a href="http://www.test.com">www.test.com</a></x>? And what about tag <pooh>beginning <a href="http://www.test.com">www.test.com</a> with p?</pooh>
+ 
