@@ -1971,8 +1971,8 @@ function _filter_preg_class_numbers() {
  */
 function _filter_preg_class_mark() {
   // @TODO: Add punctuation marks codes.
-  $rex = '\x{21}-\x{3f}'. // Basic Latin.
-  '\x{a1}-\x{BF}' // Latin-1 Supplement.
+  $rex = '\x{7b}-\x{7e}'. // Basic Latin.
+  '\x{a1}-\x{BF}'; // Latin-1 Supplement.
   ;
   return $rex;
 }
