@@ -1914,7 +1914,6 @@ function _filter_preg_class_letters() {
  * The list of blocks and hexadecimal codes are obtained from https://www.unicode.org/charts/nameslist/.
  */
 function _filter_preg_class_numbers() {
-  // @TODO: Add comments explaining the blocks ranges.
   $rex = '\x{30}-\x{39}' . // Basic Latin.
   '\x{b2}' .
   '\x{b3}' .
@@ -1936,8 +1935,7 @@ function _filter_preg_class_numbers() {
   '\x{ed0}-\x{ed9}' .
   '\x{f20}-\x{f33}' .
   '\x{1040}-\x{1049}' .
-  '\x{1369}-'.
-  '\x{137c}' .
+  '\x{1369}-\x{137c}'.
   '\x{16ee}-\x{16f0}' .
   '\x{17e0}-\x{17e9}' .
   '\x{17f0}-\x{17f9}' .
@@ -1956,8 +1954,7 @@ function _filter_preg_class_numbers() {
   '\x{3192}-\x{3195}' .
   '\x{3220}-\x{3229}' .
   '\x{3251}-\x{325f}' .
-  '\x{3280}-'.
-  '\x{3289}' .
+  '\x{3280}-\x{3289}'.
   '\x{32b1}-\x{32bf}' .
   '\x{ff10}-\x{ff19}'
   ;
@@ -1970,7 +1967,6 @@ function _filter_preg_class_numbers() {
  * The list of blocks and hexadecimal codes are obtained from https://www.unicode.org/charts/nameslist/.
  */
 function _filter_preg_class_mark() {
-  // @TODO: Add punctuation marks codes.
   $rex = '\x{7b}-\x{7e}'. // Basic Latin.
   '\x{a1}-\x{BF}'; // Latin-1 Supplement.
   ;
