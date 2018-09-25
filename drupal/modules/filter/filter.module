@@ -1803,10 +1803,6 @@ function _filter_html_escape_tips($filter, $format, $long = FALSE) {
   return t('No HTML tags allowed.');
 }
 
-function _filter_pcre_with_unicode() {
-  return TRUE;
-}
-
 /**
  * Wraps on preg_replace_callback() and update the regex pattern to work without unicode support.
  *
@@ -1842,10 +1838,8 @@ function _drupal_pcre_with_unicode() {
   $pcre_with_unicode_support = &drupal_static('pcre_with_unicode_support');
   if (!isset($pcre_with_unicode_support)) {
     // This regular expression uses unicode selector.
-    // @TODO: Change ´´ for ñ so it works. Currently is set to always fail for testing.
-    @preg_match('/\p{L}/u', '´´', $matches);
     // If there are no matches, pcre is not compiled with unicode support.
-    $pcre_with_unicode_support = !count($matches) == 0;
+    $pcre_with_unicode_support = (bool) @preg_match('/\p{L}/u', 'a');
   }
   return $pcre_with_unicode_support;
 }
