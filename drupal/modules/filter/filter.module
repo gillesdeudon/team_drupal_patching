@@ -1486,7 +1486,9 @@ function _filter_url($text, $filter) {
   // Valid end-of-path characters (so /foo. does not gobble the period).
   // 1. Allow =&# for empty URL parameters and other URL-join artifacts
   $valid_url_ending_characters = '[\p{L}\p{M}\p{N}:_+~#=/]|(?:' . $valid_url_balanced_parens . ')';
+
   $valid_url_query_chars = '[a-zA-Z0-9!?\*\'@\(\);:&=\+\$\/%#\[\]\-_\.,~|]';
+
   $valid_url_query_ending_chars = '[a-zA-Z0-9_&=#\/]';
 
   //full path
@@ -1537,6 +1539,7 @@ function _filter_url($text, $filter) {
     // removed when the closing tag is found. Until the closing tag is found,
     // no replacements are made.
     $open_tag = '';
+
     for ($i = 0; $i < count($chunks); $i++) {
       if ($chunk_type == 'text') {
         // Only process this text if there are no unclosed $ignore_tags.
