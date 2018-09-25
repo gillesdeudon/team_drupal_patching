@@ -674,3 +674,17 @@ function drupal_substr($text, $start, $length = NULL) {
     return substr($text, $istart, max(0, $iend - $istart + 1));
   }
 }
+
+/**
+ * Detect if the pcre library is compiled with unicode support.
+ */
+function drupal_is_pcre_enabled_with_unicode() {
+  $pcre_with_unicode_support = &drupal_static('pcre_with_unicode_support');
+  if (!isset($pcre_with_unicode_support)) {
+    // This regular expression uses unicode selector.
+    // If there are no matches, pcre is not compiled with unicode support.
+    $pcre_with_unicode_support = (bool) @preg_match('/\p{L}/u', 'a');
+  }
+  return $pcre_with_unicode_support;
+}
+

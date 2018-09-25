@@ -1821,7 +1821,7 @@ function _filter_html_escape_tips($filter, $format, $long = FALSE) {
  */
 function _filter_preg_replace_callback($pattern, $callback, $text) {
   // If unicode support run with default pattern.
-  if (!_drupal_pcre_with_unicode()) {
+  if (!drupal_is_pcre_enabled_with_unicode()) {
     // If no unicode support change pattern to use hexadecimal values.
     $preg_filter_url_class_letters = _filter_preg_class_letters();
     $preg_filter_url_class_numbers = _filter_preg_class_numbers();
@@ -1832,19 +1832,6 @@ function _filter_preg_replace_callback($pattern, $callback, $text) {
     $pattern = str_replace('\p{M}', $preg_filter_url_class_mark, $pattern);
   }
   return preg_replace_callback($pattern, $callback, $text);
-}
-
-/**
- * Detect if the pcre library is compiled with unicode support.
- */
-function _drupal_pcre_with_unicode() {
-  $pcre_with_unicode_support = &drupal_static('pcre_with_unicode_support');
-  if (!isset($pcre_with_unicode_support)) {
-    // This regular expression uses unicode selector.
-    // If there are no matches, pcre is not compiled with unicode support.
-    $pcre_with_unicode_support = (bool) @preg_match('/\p{L}/u', 'a');
-  }
-  return $pcre_with_unicode_support;
 }
 
 /**
