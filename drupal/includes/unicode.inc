@@ -83,6 +83,38 @@ define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{FF3B}-\x{FF40}\x{FF5B}-\x{FF65}\x{FFE0}-\x{FFFD}');
 
 /**
+ * Matches all 'L' Unicode character classes (letters).
+ *
+ * @see https://www.unicode.org/charts/nameslist/.
+ */
+define('PREG_CLASS_LETTERS',
+  '\x{40}-\x{7a}\x{c0}-\x{ff}\x{100}-\x{17f}\x{180}-\x{24f}\x{250}-\x{2Af}' .
+  '\x{370}-\x{3ff}\x{400}-\x{4ff}\x{500}-\x{527}\x{539}-\x{58f}\x{590}-\x{5ff}' .
+  '\x{600}-\x{6ff}\x{780}-\x{7bf}\x{900}-\x{97f}\x{980}-\x{9ff}\x{a00}-\x{a7f}' .
+  '\x{a80}-\x{aff}\x{b00}-\x{b7f}\x{b80}-\x{bff}\x{c00}-\x{c7f}\x{c80}-\x{cff}' .
+  '\x{d00}-\x{d7f}\x{d80}-\x{dff}\x{e00}-\x{e7f}\x{e81}-\x{eff}\x{f00}-\x{fff}' .
+  '\x{1000}-\x{109f}\x{10a0}-\x{10ff}\x{1100}-\x{11ff}\x{1200}-\x{137f}' .
+  '\x{13a0}-\x{13ff}\x{1400}-\x{167f}\x{1680}-\x{169f}\x{16a0}-\x{16ff}' .
+  '\x{1700}-\x{171f}\x{1720}-\x{173f}\x{1740}-\x{175f}\x{1760}-\x{177f}' .
+  '\x{1780}-\x{17ff}\x{1800}-\x{18af}\x{1900}-\x{194f}\x{1950}-\x{197f}' .
+  '\x{19e0}-\x{19ff}\x{1d00}-\x{1d7f}\x{1e00}-\x{1eff}\x{1f00}-\x{1fff}' .
+  '\x{3040}-\x{309f}\x{30a0}-\x{30ff}\x{4E00}-\x{9FEF}');
+
+/**
+ * Matches all 'N' Unicode character classes (numbers)
+ */
+define('PREG_CLASS_NUMBERS',
+  '\x{30}-\x{39}\x{b2}\x{b3}\x{b9}\x{bc}-\x{be}\x{660}-\x{669}\x{6f0}-\x{6f9}' .
+  '\x{966}-\x{96f}\x{9e6}-\x{9ef}\x{9f4}-\x{9f9}\x{a66}-\x{a6f}\x{ae6}-\x{aef}' .
+  '\x{b66}-\x{b6f}\x{be7}-\x{bf2}\x{c66}-\x{c6f}\x{ce6}-\x{cef}\x{d66}-\x{d6f}' .
+  '\x{e50}-\x{e59}\x{ed0}-\x{ed9}\x{f20}-\x{f33}\x{1040}-\x{1049}\x{1369}-' .
+  '\x{137c}\x{16ee}-\x{16f0}\x{17e0}-\x{17e9}\x{17f0}-\x{17f9}\x{1810}-\x{1819}' .
+  '\x{1946}-\x{194f}\x{2070}\x{2074}-\x{2079}\x{2080}-\x{2089}\x{2153}-\x{2183}' .
+  '\x{2460}-\x{249b}\x{24ea}-\x{24ff}\x{2776}-\x{2793}\x{3007}\x{3021}-\x{3029}' .
+  '\x{3038}-\x{303a}\x{3192}-\x{3195}\x{3220}-\x{3229}\x{3251}-\x{325f}\x{3280}-' .
+  '\x{3289}\x{32b1}-\x{32bf}\x{ff10}-\x{ff19}');
+
+/**
  * Wrapper around _unicode_check().
  */
 function unicode_check() {
@@ -685,6 +717,6 @@ function drupal_is_pcre_enabled_with_unicode() {
     // If there are no matches, pcre is not compiled with unicode support.
     $pcre_with_unicode_support = (bool) @preg_match('/\p{L}/u', 'a');
   }
+
   return $pcre_with_unicode_support;
 }
-

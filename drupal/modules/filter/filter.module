@@ -6,6 +6,13 @@
  */
 
 /**
+ * Matches all 'M' Unicode character intended to be combined with another characters (marks).
+ *
+ * @see https://www.unicode.org/charts/nameslist/.
+ */
+define('PREG_CLASS_COMBINED_MARKS', '\x{7b}-\x{7e}\x{a1}-\x{BF}');
+
+/**
  * Implements hook_help().
  */
 function filter_help($path, $arg) {
@@ -1820,141 +1827,25 @@ function _filter_html_escape_tips($filter, $format, $long = FALSE) {
  *   String after the the callback.
  */
 function _filter_preg_replace_callback($pattern, $callback, $text) {
-  // If unicode support run with default pattern.
-  if (!drupal_is_pcre_enabled_with_unicode()) {
-    // If no unicode support change pattern to use hexadecimal values.
-    $preg_filter_url_class_letters = _filter_preg_class_letters();
-    $preg_filter_url_class_numbers = _filter_preg_class_numbers();
-    $preg_filter_url_class_mark = _filter_preg_class_mark();
-    // Replace all letters.
-    $pattern = str_replace('\p{L}', $preg_filter_url_class_letters, $pattern);
-    $pattern = str_replace('\p{N}', $preg_filter_url_class_numbers, $pattern);
-    $pattern = str_replace('\p{M}', $preg_filter_url_class_mark, $pattern);
+  // Use the advanced drupal_static() pattern, since this is called very often.
+  static $drupal_static_fast;
+  if (!isset($drupal_static_fast)) {
+    $drupal_static_fast['preg_pattern'] = &drupal_static(__FUNCTION__);
   }
-  return preg_replace_callback($pattern, $callback, $text);
-}
+  $preg_pattern = &$drupal_static_fast['preg_pattern'];
 
-/**
- * Returns all 'L' Unicode character classes (letters).
- *
- * The list of blocks and hexadecimal codes are obtained from https://www.unicode.org/charts/nameslist/.
- */
-function _filter_preg_class_letters() {
-  $rex = '\x{40}-\x{7a}'. // Basic Latin.
-  '\x{c0}-\x{ff}'. // Latin-1 Supplement.
-  '\x{100}-\x{17f}'. // Latin Extended-A.
-  '\x{180}-\x{24f}'. // Latin Extended-B.
-  '\x{250}-\x{2Af}'. // IPA Extensions.
-  '\x{370}-\x{3ff}'. // Greek and Coptic.
-  '\x{400}-\x{4ff}'. // Cyrillic.
-  '\x{500}-\x{527}'. // Cyrillic Supplementary.
-  '\x{539}-\x{58f}'. // Armenian.
-  '\x{590}-\x{5ff}'. // Hebrew.
-  '\x{600}-\x{6ff}'. // Arabic.
-  '\x{780}-\x{7bf}'. // Thaana.
-  '\x{900}-\x{97f}'. // Devanagari.
-  '\x{980}-\x{9ff}'. // Bengali.
-  '\x{a00}-\x{a7f}'. // Gurmukhi.
-  '\x{a80}-\x{aff}'. // Gujarati.
-  '\x{b00}-\x{b7f}'. // Oriya.
-  '\x{b80}-\x{bff}'. // Tamil.
-  '\x{c00}-\x{c7f}'. // Telugu.
-  '\x{c80}-\x{cff}'. // Kannada.
-  '\x{d00}-\x{d7f}'. // Malayalam.
-  '\x{d80}-\x{dff}'. // Sinhala.
-  '\x{e00}-\x{e7f}'. // Thai.
-  '\x{e81}-\x{eff}'. // Lao.
-  '\x{f00}-\x{fff}'. // Tibetan.
-  '\x{1000}-\x{109f}'. // Myanmar.
-  '\x{10a0}-\x{10ff}'. // Georgian.
-  '\x{1100}-\x{11ff}'. // Hangul Jamo.
-  '\x{1200}-\x{137f}'. // Ethiopic.
-  '\x{13a0}-\x{13ff}'. // Cherokee.
-  '\x{1400}-\x{167f}'. // Unified Canadian Aboriginal Syllabics.
-  '\x{1680}-\x{169f}'. // Ogham.
-  '\x{16a0}-\x{16ff}'. // Runic.
-  '\x{1700}-\x{171f}'. // Tagalog.
-  '\x{1720}-\x{173f}'. // Hanunoo.
-  '\x{1740}-\x{175f}'. // Buhid.
-  '\x{1760}-\x{177f}'. // Tagbanwa.
-  '\x{1780}-\x{17ff}'. // Khmer.
-  '\x{1800}-\x{18af}'. // Mongolian.
-  '\x{1900}-\x{194f}'. // Limbu.
-  '\x{1950}-\x{197f}'. // Tai Le.
-  '\x{19e0}-\x{19ff}'. // Khmer Symbols.
-  '\x{1d00}-\x{1d7f}'. // Phonetic Extensions.
-  '\x{1e00}-\x{1eff}'. // Latin Extended Additional.
-  '\x{1f00}-\x{1fff}'. // Greek Extended.
-  '\x{3040}-\x{309f}'. // Hiragana.
-  '\x{30a0}-\x{30ff}'. // Katakana.
-  '\x{4E00}-\x{9FEF}' // CJK Unified Ideographs.
-  ;
-  return $rex;
-}
+  if (!isset($preg_pattern[$pattern])) {
+    $preg_pattern[$pattern] = $pattern;
+    // If unicode support run with default pattern.
+    if (!drupal_is_pcre_enabled_with_unicode()) {
+      // If no unicode support change pattern to use hexadecimal values.
+      $pattern = str_replace('\p{L}', PREG_CLASS_LETTERS, $pattern);
+      $pattern = str_replace('\p{N}', PREG_CLASS_NUMBERS, $pattern);
+      $preg_pattern[$pattern] = str_replace('\p{M}', PREG_CLASS_COMBINED_MARKS, $pattern);
+    }
+  }
 
-/**
- * Matches all 'N' Unicode character classes (numbers).
- *
- * The list of blocks and hexadecimal codes are obtained from https://www.unicode.org/charts/nameslist/.
- */
-function _filter_preg_class_numbers() {
-  $rex = '\x{30}-\x{39}' . // Basic Latin.
-  '\x{b2}' .
-  '\x{b3}' .
-  '\x{b9}' .
-  '\x{bc}-\x{be}' .
-  '\x{660}-\x{669}' .
-  '\x{6f0}-\x{6f9}'.
-  '\x{966}-\x{96f}' .
-  '\x{9e6}-\x{9ef}' .
-  '\x{9f4}-\x{9f9}' .
-  '\x{a66}-\x{a6f}' .
-  '\x{ae6}-\x{aef}'.
-  '\x{b66}-\x{b6f}' .
-  '\x{be7}-\x{bf2}' .
-  '\x{c66}-\x{c6f}' .
-  '\x{ce6}-\x{cef}' .
-  '\x{d66}-\x{d6f}'.
-  '\x{e50}-\x{e59}' .
-  '\x{ed0}-\x{ed9}' .
-  '\x{f20}-\x{f33}' .
-  '\x{1040}-\x{1049}' .
-  '\x{1369}-\x{137c}'.
-  '\x{16ee}-\x{16f0}' .
-  '\x{17e0}-\x{17e9}' .
-  '\x{17f0}-\x{17f9}' .
-  '\x{1810}-\x{1819}'.
-  '\x{1946}-\x{194f}' .
-  '\x{2070}' .
-  '\x{2074}-\x{2079}' .
-  '\x{2080}-\x{2089}' .
-  '\x{2153}-\x{2183}'.
-  '\x{2460}-\x{249b}' .
-  '\x{24ea}-\x{24ff}' .
-  '\x{2776}-\x{2793}' .
-  '\x{3007}' .
-  '\x{3021}-\x{3029}'.
-  '\x{3038}-\x{303a}' .
-  '\x{3192}-\x{3195}' .
-  '\x{3220}-\x{3229}' .
-  '\x{3251}-\x{325f}' .
-  '\x{3280}-\x{3289}'.
-  '\x{32b1}-\x{32bf}' .
-  '\x{ff10}-\x{ff19}'
-  ;
-  return $rex;
-}
-
-/**
- * Matches all 'M' Unicode character intended to be combined with another characters (marks).
- *
- * The list of blocks and hexadecimal codes are obtained from https://www.unicode.org/charts/nameslist/.
- */
-function _filter_preg_class_mark() {
-  $rex = '\x{7b}-\x{7e}'. // Basic Latin.
-  '\x{a1}-\x{BF}'; // Latin-1 Supplement.
-  ;
-  return $rex;
+  return preg_replace_callback($preg_pattern[$pattern], $callback, $text);
 }
 /**
  * @} End of "Standard filters".
