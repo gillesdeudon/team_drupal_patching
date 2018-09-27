@@ -93,12 +93,16 @@ define('PREG_CLASS_LETTERS',
   '\x{600}-\x{6ff}\x{780}-\x{7bf}\x{900}-\x{97f}\x{980}-\x{9ff}\x{a00}-\x{a7f}' .
   '\x{a80}-\x{aff}\x{b00}-\x{b7f}\x{b80}-\x{bff}\x{c00}-\x{c7f}\x{c80}-\x{cff}' .
   '\x{d00}-\x{d7f}\x{d80}-\x{dff}\x{e00}-\x{e7f}\x{e81}-\x{eff}\x{f00}-\x{fff}' .
-  '\x{1000}-\x{109f}\x{10a0}-\x{10ff}\x{1100}-\x{11ff}\x{1200}-\x{137f}' .
+  '\x{1000}-\x{109f}\x{10a0}-\x{10ff}\x{1200}-\x{137f}' .
   '\x{13a0}-\x{13ff}\x{1400}-\x{167f}\x{1680}-\x{169f}\x{16a0}-\x{16ff}' .
   '\x{1700}-\x{171f}\x{1720}-\x{173f}\x{1740}-\x{175f}\x{1760}-\x{177f}' .
   '\x{1780}-\x{17ff}\x{1800}-\x{18af}\x{1900}-\x{194f}\x{1950}-\x{197f}' .
   '\x{19e0}-\x{19ff}\x{1d00}-\x{1d7f}\x{1e00}-\x{1eff}\x{1f00}-\x{1fff}' .
-  '\x{3040}-\x{309f}\x{30a0}-\x{30ff}\x{4E00}-\x{9FEF}');
+  '\x{30a0}-\x{30ff}\x{4E00}-\x{9FEF}\x{1100}-\x{11FF}\x{3040}-\x{309F}\x{30A1}-\x{318E}' .
+  '\x{31A0}-\x{31B7}\x{31F0}-\x{31FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FCF}' .
+  '\x{A000}-\x{A48F}\x{A4D0}-\x{A4FD}\x{A960}-\x{A97F}\x{AC00}-\x{D7FF}' .
+  '\x{F900}-\x{FAFF}\x{FF21}-\x{FF3A}\x{FF41}-\x{FF5A}\x{FF66}-\x{FFDC}' .
+  '\x{20000}-\x{2FFFD}\x{30000}-\x{3FFFD}');
 
 /**
  * Matches all 'N' Unicode character classes (numbers)
