@@ -1828,7 +1828,7 @@ function _filter_html_escape_tips($filter, $format, $long = FALSE) {
  */
 function _filter_preg_replace_callback($pattern, $callback, $text) {
   // If unicode support run with default pattern.
-  if (!drupal_is_pcre_enabled_with_unicode()) {
+  if (drupal_is_pcre_enabled_with_unicode()) {
     return preg_replace_callback($pattern, $callback, $text);
   }
 
