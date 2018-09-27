@@ -1819,33 +1819,28 @@ function _filter_html_escape_tips($filter, $format, $long = FALSE) {
  * @param (string) $pattern
  *   Regular expression to match.
  * @param (string) $callback
- *   Function to call after the regular expression  match.
+ *   Function to call after the regular expression match.
  * @param (string) $text
  *   Text to check.
  *
- * @return
- *   String after the the callback.
+ * @return string
+ *   String the replacements done.
  */
 function _filter_preg_replace_callback($pattern, $callback, $text) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['preg_pattern'] = &drupal_static(__FUNCTION__);
-  }
-  $preg_pattern = &$drupal_static_fast['preg_pattern'];
-
-  if (!isset($preg_pattern[$pattern])) {
-    $preg_pattern[$pattern] = $pattern;
-    // If unicode support run with default pattern.
-    if (!drupal_is_pcre_enabled_with_unicode()) {
-      // If no unicode support change pattern to use hexadecimal values.
-      $pattern = str_replace('\p{L}', PREG_CLASS_LETTERS, $pattern);
-      $pattern = str_replace('\p{N}', PREG_CLASS_NUMBERS, $pattern);
-      $preg_pattern[$pattern] = str_replace('\p{M}', PREG_CLASS_COMBINED_MARKS, $pattern);
-    }
+  // If unicode support run with default pattern.
+  if (!drupal_is_pcre_enabled_with_unicode()) {
+    return preg_replace_callback($pattern, $callback, $text);
   }
 
-  return preg_replace_callback($preg_pattern[$pattern], $callback, $text);
+  // If no unicode support change pattern to use hexadecimal values.
+  $preg_pattern = &drupal_static(__FUNCTION__ . $pattern);
+  if (!isset($preg_pattern)) {
+    $pattern = str_replace('\p{L}', PREG_CLASS_LETTERS . PREG_CLASS_CJK, $pattern);
+    $pattern = str_replace('\p{N}', PREG_CLASS_NUMBERS, $pattern);
+    $preg_pattern = str_replace('\p{M}', PREG_CLASS_COMBINED_MARKS, $pattern);
+  }
+
+  return preg_replace_callback($preg_pattern, $callback, $text);
 }
 /**
  * @} End of "Standard filters".
