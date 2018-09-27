@@ -119,6 +119,27 @@ define('PREG_CLASS_NUMBERS',
   '\x{3289}\x{32b1}-\x{32bf}\x{ff10}-\x{ff19}');
 
 /**
+ * Matches CJK (Chinese, Japanese, Korean) letter-like characters.
+ *
+ * This list is derived from the "East Asian Scripts" section of
+ * http://www.unicode.org/charts/index.html, as well as a comment on
+ * http://unicode.org/reports/tr11/tr11-11.html listing some character
+ * ranges that are reserved for additional CJK ideographs.
+ *
+ * The character ranges do not include numbers, punctuation, or symbols, since
+ * these are handled separately in search. Note that radicals and strokes are
+ * considered symbols. (See
+ * http://www.unicode.org/Public/UNIDATA/extracted/DerivedGeneralCategory.txt)
+ *
+ * @see search_expand_cjk()
+ */
+define('PREG_CLASS_CJK', '\x{1100}-\x{11FF}\x{3040}-\x{309F}\x{30A1}-\x{318E}' .
+  '\x{31A0}-\x{31B7}\x{31F0}-\x{31FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FCF}' .
+  '\x{A000}-\x{A48F}\x{A4D0}-\x{A4FD}\x{A960}-\x{A97F}\x{AC00}-\x{D7FF}' .
+  '\x{F900}-\x{FAFF}\x{FF21}-\x{FF3A}\x{FF41}-\x{FF5A}\x{FF66}-\x{FFDC}' .
+  '\x{20000}-\x{2FFFD}\x{30000}-\x{3FFFD}');
+
+/**
  * Wrapper around _unicode_check().
  */
 function unicode_check() {
